@@ -1,3 +1,5 @@
+from __future__ import division
+
 import unittest
 import warnings
 import os
@@ -7,12 +9,13 @@ import getpass
 import sys
 import tempfile
 
-import atpy
 import numpy as np
 np.seterr(all='ignore')
 
 from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
+
+from .. import Table
 
 # Size of the test table
 shape = (100, )
@@ -22,8 +25,18 @@ shape_vector = (100, 10)
 def random_int_array(dtype, shape):
     random.seed('integer')
     n = np.product(shape)
-    n = n * np.iinfo(dtype).bits / 8
-    s = "".join(chr(random.randrange(0, 256)) for i in xrange(n))
+    n = n * np.iinfo(dtype).bits // 8
+    print(dtype, np.iinfo(dtype).bits, n)
+    if sys.version_info[0] > 2:
+        s = bytes([random.randrange(0, 256) for i in range(n)])
+    else:
+        s = "".join(chr(random.randrange(0, 256)) for i in range(n))
+    print(s)
+    print(repr(s))
+    print(len(s))
+    print(shape)
+    print(np.fromstring(s, dtype=dtype))
+    print(np.fromstring(s, dtype=dtype).shape)
     return np.fromstring(s, dtype=dtype).reshape(shape)
 
 
@@ -34,7 +47,10 @@ def random_float_array(dtype, shape):
         n = n * 4
     else:
         n = n * 8
-    s = "".join(chr(random.randrange(0, 256)) for i in xrange(n))
+    if sys.version_info[0] > 2:
+        s = bytes([random.randrange(0, 256) for i in range(n)])
+    else:
+        s = "".join(chr(random.randrange(0, 256)) for i in range(n))
     array = np.fromstring(s, dtype=dtype)
     if np.sum(np.isnan(array)):
         array[np.isnan(array)] = random_float_array(dtype, array[np.isnan(array)].shape)
@@ -62,7 +78,7 @@ def random_generic(dtype, name, shape):
         for i in range(shape[0]):
             s = ""
             for k in range(dtype.itemsize):
-                s += random.choice(string.letters + string.digits)
+                s += random.choice(string.ascii_letters + string.digits)
             values[i] = s
 
     return values
@@ -70,7 +86,7 @@ def random_generic(dtype, name, shape):
 
 def generate_simple_table(dtype, shape):
 
-    table = atpy.Table(name='atpy_test')
+    table = Table(name='atpy_test')
 
     try:
         name = dtype.__name__
@@ -127,7 +143,7 @@ class EmptyColumnsTestCase(unittest.TestCase, ColumnsDefaultTestCase):
 
     def generic_test(self, dtype):
         try:
-            t = atpy.Table()
+            t = Table()
             t.add_empty_column('a', dtype, shape=shape)
             t.add_empty_column('b', dtype)
             t.add_empty_column('c', dtype)
@@ -139,7 +155,7 @@ class EmptyVectorColumnsTestCase(unittest.TestCase, ColumnsDefaultTestCase):
 
     def generic_test(self, dtype):
         try:
-            t = atpy.Table()
+            t = Table()
             t.add_empty_column('a', dtype, shape=shape_vector)
             t.add_empty_column('b', dtype)
             t.add_empty_column('c', dtype, shape=shape_vector)
@@ -261,7 +277,7 @@ class TestFITS(unittest.TestCase, DefaultTestCase):
 
         self.table_orig = generate_simple_table(dtype, shape)
         self.table_orig.write(filename, verbose=False, overwrite=True)
-        self.table_new = atpy.Table(filename, verbose=False)
+        self.table_new = Table(filename, verbose=False)
 
 
 class TestFITSVector(unittest.TestCase, DefaultTestCase):
@@ -277,7 +293,7 @@ class TestFITSVector(unittest.TestCase, DefaultTestCase):
 
         self.table_orig = generate_simple_table(dtype, shape_vector)
         self.table_orig.write(filename, verbose=False, overwrite=True)
-        self.table_new = atpy.Table(filename, verbose=False)
+        self.table_new = Table(filename, verbose=False)
 
 
 try:
@@ -299,7 +315,7 @@ class TestHDF5(unittest.TestCase, DefaultTestCase):
 
         self.table_orig = generate_simple_table(dtype, shape)
         self.table_orig.write(filename, verbose=False, overwrite=True)
-        self.table_new = atpy.Table(filename, verbose=False)
+        self.table_new = Table(filename, verbose=False)
 
 
 @pytest.mark.skipif('not HAS_H5PY')
@@ -315,7 +331,7 @@ class TestHDF5Vector(unittest.TestCase, DefaultTestCase):
 
         self.table_orig = generate_simple_table(dtype, shape_vector)
         self.table_orig.write(filename, verbose=False, overwrite=True)
-        self.table_new = atpy.Table(filename, verbose=False)
+        self.table_new = Table(filename, verbose=False)
 
 
 class TestVO(unittest.TestCase, DefaultTestCase):
@@ -330,7 +346,7 @@ class TestVO(unittest.TestCase, DefaultTestCase):
 
         self.table_orig = generate_simple_table(dtype, shape)
         self.table_orig.write(filename, verbose=False, overwrite=True)
-        self.table_new = atpy.Table(filename, verbose=False)
+        self.table_new = Table(filename, verbose=False)
 
 
 class TestVOVector(unittest.TestCase, DefaultTestCase):
@@ -346,7 +362,7 @@ class TestVOVector(unittest.TestCase, DefaultTestCase):
 
         self.table_orig = generate_simple_table(dtype, shape_vector)
         self.table_orig.write(filename, verbose=False, overwrite=True)
-        self.table_new = atpy.Table(filename, verbose=False)
+        self.table_new = Table(filename, verbose=False)
 
 
 class TestIPAC(unittest.TestCase, DefaultTestCase):
@@ -359,7 +375,7 @@ class TestIPAC(unittest.TestCase, DefaultTestCase):
 
         self.table_orig = generate_simple_table(dtype, shape)
         self.table_orig.write(filename, verbose=False, overwrite=True)
-        self.table_new = atpy.Table(filename, verbose=False)
+        self.table_new = Table(filename, verbose=False)
 
 
 class TestSQLite(unittest.TestCase, DefaultTestCase):
@@ -374,7 +390,7 @@ class TestSQLite(unittest.TestCase, DefaultTestCase):
 
         self.table_orig = generate_simple_table(dtype, shape)
         self.table_orig.write('sqlite', filename, verbose=False, overwrite=True)
-        self.table_new = atpy.Table('sqlite', filename, verbose=False)
+        self.table_new = Table('sqlite', filename, verbose=False)
 
 
 class TestSQLiteQuery(unittest.TestCase, DefaultTestCase):
@@ -389,4 +405,4 @@ class TestSQLiteQuery(unittest.TestCase, DefaultTestCase):
 
         self.table_orig = generate_simple_table(dtype, shape)
         self.table_orig.write('sqlite', filename, verbose=False, overwrite=True)
-        self.table_new = atpy.Table('sqlite', filename, verbose=False, query='select * from atpy_test')
+        self.table_new = Table('sqlite', filename, verbose=False, query='select * from atpy_test')

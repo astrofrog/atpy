@@ -7,16 +7,7 @@ import math
 
 # SQLite
 
-try:
-    import sqlite3
-    sqlite3_installed = True
-except:
-    sqlite3_installed = False
-
-
-def _check_sqlite3_installed():
-    if not sqlite3_installed:
-        raise Exception("Cannot read/write SQLite tables - sqlite3 required")
+import sqlite3
 
 # SQLite
 
@@ -284,7 +275,6 @@ def connect_database(dbtype, *args, **kwargs):
         - pgdb.connect() for PostgreSQL
     '''
     if dbtype == 'sqlite':
-        _check_sqlite3_installed()
         connection = sqlite3.connect(*args, **kwargs)
     elif dbtype == 'mysql':
         _check_MySQLdb_installed()

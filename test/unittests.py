@@ -22,7 +22,7 @@ password = "C2#uwQsk"
 def random_int_array(dtype, shape):
     n = np.product(shape)
     n = n * np.iinfo(dtype).bits / 8
-    s = "".join(chr(random.randrange(0, 256)) for i in xrange(n))
+    s = "".join(chr(random.randrange(0, 256)) for i in range(n))
     return np.fromstring(s, dtype=dtype).reshape(shape)
 
 
@@ -32,7 +32,7 @@ def random_float_array(dtype, shape):
         n = n * 4
     else:
         n = n * 8
-    s = "".join(chr(random.randrange(0, 256)) for i in xrange(n))
+    s = "".join(chr(random.randrange(0, 256)) for i in range(n))
     array = np.fromstring(s, dtype=dtype)
     if np.sum(np.isnan(array)):
         array[np.isnan(array)] = random_float_array(dtype, array[np.isnan(array)].shape)
@@ -57,7 +57,7 @@ def random_generic(dtype, name, shape):
         for i in range(shape[0]):
             s = ""
             for k in range(dtype.itemsize):
-                s += random.choice(string.letters + string.digits)
+                s += random.choice(string.ascii_letters + string.digits)
             values[i] = s
 
     return values

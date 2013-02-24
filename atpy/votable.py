@@ -1,17 +1,16 @@
 from __future__ import print_function, division
 
 import os
-from distutils import version
 import numpy as np
 import warnings
-
-from .exceptions import TableException
-from .helpers import smart_dtype
-from .decorators import auto_download_to_file, auto_decompress_to_fileobj, auto_fileobj_to_file
 
 from astropy.io.votable import parse
 from astropy.io.votable.tree import VOTableFile, Resource, Field, Param
 from astropy.io.votable.tree import Table as VOTable
+
+from .exceptions import TableException
+from .helpers import smart_dtype
+from .decorators import auto_download_to_file, auto_decompress_to_fileobj, auto_fileobj_to_file
 
 # Define type conversion dictionary
 type_dict = {}

@@ -84,7 +84,7 @@ def read(self, filename, definition=3, verbose=False, smart_typing=False):
     self.reset()
 
     # Open file for reading
-    f = file(filename, 'rb')
+    f = open(filename, 'rb')
 
     line = f.readline()
 
@@ -306,7 +306,7 @@ def write(self, filename, overwrite=False):
             raise Exception("File exists: %s" % filename)
 
     # Open file for writing
-    f = file(filename, 'wb')
+    f = open(filename, 'wb')
 
     for key in self.keywords:
         value = self.keywords[key]
