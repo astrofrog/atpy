@@ -5,23 +5,22 @@ import string
 import random
 import getpass
 import sys
+import tempfile
 
 import atpy
 import numpy as np
 np.seterr(all='ignore')
 
 from astropy.tests.helper import pytest
+from astropy.utils.misc import NumpyRNGContext
 
 # Size of the test table
 shape = (100, )
 shape_vector = (100, 10)
 
-# SQL connection parameters
-username = getpass.getuser()
-password = "C2#uwQsk"
-
 
 def random_int_array(dtype, shape):
+    random.seed('integer')
     n = np.product(shape)
     n = n * np.iinfo(dtype).bits / 8
     s = "".join(chr(random.randrange(0, 256)) for i in xrange(n))
@@ -29,6 +28,7 @@ def random_int_array(dtype, shape):
 
 
 def random_float_array(dtype, shape):
+    random.seed('float')
     n = np.product(shape)
     if dtype == np.float32:
         n = n * 4
@@ -48,12 +48,15 @@ numpy_types = [np.bool, np.int8, np.int16, np.int32, np.int64, np.uint8,
 
 def random_generic(dtype, name, shape):
 
+    random.seed('generic')
+
     if 'int' in name:
         values = random_int_array(dtype, shape)
     elif 'float' in name:
         values = random_float_array(dtype, shape)
     elif 'bool' in name:
-        values = np.random.random(shape) > 0.5
+        with NumpyRNGContext(12345):
+            values = np.random.random(shape) > 0.5
     else:
         values = np.zeros(shape, dtype=dtype)
         for i in range(shape[0]):
@@ -254,10 +257,11 @@ class TestFITS(unittest.TestCase, DefaultTestCase):
 
     def writeread(self, dtype):
 
+        filename = tempfile.mktemp(suffix='.fits')
+
         self.table_orig = generate_simple_table(dtype, shape)
-        self.table_orig.write('test_atpy.fits', verbose=False, overwrite=True)
-        self.table_new = atpy.Table('test_atpy.fits', verbose=False)
-        os.remove('test_atpy.fits')
+        self.table_orig.write(filename, verbose=False, overwrite=True)
+        self.table_new = atpy.Table(filename, verbose=False)
 
 
 class TestFITSVector(unittest.TestCase, DefaultTestCase):
@@ -269,10 +273,11 @@ class TestFITSVector(unittest.TestCase, DefaultTestCase):
 
     def writeread(self, dtype):
 
+        filename = tempfile.mktemp(suffix='.fits')
+
         self.table_orig = generate_simple_table(dtype, shape_vector)
-        self.table_orig.write('test_atpy.fits', verbose=False, overwrite=True)
-        self.table_new = atpy.Table('test_atpy.fits', verbose=False)
-        os.remove('test_atpy.fits')
+        self.table_orig.write(filename, verbose=False, overwrite=True)
+        self.table_new = atpy.Table(filename, verbose=False)
 
 
 try:
@@ -290,10 +295,11 @@ class TestHDF5(unittest.TestCase, DefaultTestCase):
 
     def writeread(self, dtype):
 
+        filename = tempfile.mktemp(suffix='.hdf5')
+
         self.table_orig = generate_simple_table(dtype, shape)
-        self.table_orig.write('test_atpy.hdf5', verbose=False, overwrite=True)
-        self.table_new = atpy.Table('test_atpy.hdf5', verbose=False)
-        os.remove('test_atpy.hdf5')
+        self.table_orig.write(filename, verbose=False, overwrite=True)
+        self.table_new = atpy.Table(filename, verbose=False)
 
 
 @pytest.mark.skipif('not HAS_H5PY')
@@ -305,10 +311,11 @@ class TestHDF5Vector(unittest.TestCase, DefaultTestCase):
 
     def writeread(self, dtype):
 
+        filename = tempfile.mktemp(suffix='.hdf5')
+
         self.table_orig = generate_simple_table(dtype, shape_vector)
-        self.table_orig.write('test_atpy.hdf5', verbose=False, overwrite=True)
-        self.table_new = atpy.Table('test_atpy.hdf5', verbose=False)
-        os.remove('test_atpy.hdf5')
+        self.table_orig.write(filename, verbose=False, overwrite=True)
+        self.table_new = atpy.Table(filename, verbose=False)
 
 
 class TestVO(unittest.TestCase, DefaultTestCase):
@@ -319,10 +326,11 @@ class TestVO(unittest.TestCase, DefaultTestCase):
 
     def writeread(self, dtype):
 
+        filename = tempfile.mktemp(suffix='.xml')
+
         self.table_orig = generate_simple_table(dtype, shape)
-        self.table_orig.write('test_atpy.xml', verbose=False, overwrite=True)
-        self.table_new = atpy.Table('test_atpy.xml', verbose=False)
-        os.remove('test_atpy.xml')
+        self.table_orig.write(filename, verbose=False, overwrite=True)
+        self.table_new = atpy.Table(filename, verbose=False)
 
 
 class TestVOVector(unittest.TestCase, DefaultTestCase):
@@ -334,10 +342,11 @@ class TestVOVector(unittest.TestCase, DefaultTestCase):
 
     def writeread(self, dtype):
 
+        filename = tempfile.mktemp(suffix='.xml')
+
         self.table_orig = generate_simple_table(dtype, shape_vector)
-        self.table_orig.write('test_atpy.xml', verbose=False, overwrite=True)
-        self.table_new = atpy.Table('test_atpy.xml', verbose=False)
-        os.remove('test_atpy.xml')
+        self.table_orig.write(filename, verbose=False, overwrite=True)
+        self.table_new = atpy.Table(filename, verbose=False)
 
 
 class TestIPAC(unittest.TestCase, DefaultTestCase):
@@ -346,10 +355,11 @@ class TestIPAC(unittest.TestCase, DefaultTestCase):
 
     def writeread(self, dtype):
 
+        filename = tempfile.mktemp(suffix='.tbl')
+
         self.table_orig = generate_simple_table(dtype, shape)
-        self.table_orig.write('test_atpy.tbl', verbose=False, overwrite=True)
-        self.table_new = atpy.Table('test_atpy.tbl', verbose=False)
-        os.remove('test_atpy.tbl')
+        self.table_orig.write(filename, verbose=False, overwrite=True)
+        self.table_new = atpy.Table(filename, verbose=False)
 
 
 class TestSQLite(unittest.TestCase, DefaultTestCase):
@@ -360,10 +370,11 @@ class TestSQLite(unittest.TestCase, DefaultTestCase):
 
     def writeread(self, dtype):
 
+        filename = tempfile.mktemp(suffix='.db')
+
         self.table_orig = generate_simple_table(dtype, shape)
-        self.table_orig.write('sqlite', 'test_atpy.db', verbose=False, overwrite=True)
-        self.table_new = atpy.Table('sqlite', 'test_atpy.db', verbose=False)
-        os.remove('test_atpy.db')
+        self.table_orig.write('sqlite', filename, verbose=False, overwrite=True)
+        self.table_new = atpy.Table('sqlite', filename, verbose=False)
 
 
 class TestSQLiteQuery(unittest.TestCase, DefaultTestCase):
@@ -374,7 +385,8 @@ class TestSQLiteQuery(unittest.TestCase, DefaultTestCase):
 
     def writeread(self, dtype):
 
+        filename = tempfile.mktemp(suffix='.db')
+
         self.table_orig = generate_simple_table(dtype, shape)
-        self.table_orig.write('sqlite', 'test_atpy.db', verbose=False, overwrite=True)
-        self.table_new = atpy.Table('sqlite', 'test_atpy.db', verbose=False, query='select * from atpy_test')
-        os.remove('test_atpy.db')
+        self.table_orig.write('sqlite', filename, verbose=False, overwrite=True)
+        self.table_new = atpy.Table('sqlite', filename, verbose=False, query='select * from atpy_test')
