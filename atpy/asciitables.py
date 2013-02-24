@@ -6,16 +6,7 @@ from .decorators import auto_download_to_file, auto_decompress_to_fileobj
 
 # Thanks to Moritz Guenther for providing the initial code used to create this file
 
-try:
-    import asciitable
-    asciitable_installed = True
-except:
-    asciitable_installed = False
-
-
-def _check_asciitable_installed():
-    if not asciitable_installed:
-        raise Exception("Cannot read data with asciitable - no version of asciitable is found")
+from astropy.io import ascii
 
 
 def read_cds(self, filename, **kwargs):
@@ -27,9 +18,9 @@ def read_cds(self, filename, **kwargs):
             *filename*: [ string ]
                 The file to read the table from
 
-        Keyword Arguments are passed to asciitable
+        Keyword Arguments are passed to astropy.io.ascii
     '''
-    read_ascii(self, filename, Reader=asciitable.CdsReader, **kwargs)
+    read_ascii(self, filename, Reader=ascii.Cds, **kwargs)
 
 
 def read_daophot(self, filename, **kwargs):
@@ -41,9 +32,9 @@ def read_daophot(self, filename, **kwargs):
             *filename*: [ string ]
                 The file to read the table from
 
-        Keyword Arguments are passed to asciitable
+        Keyword Arguments are passed to astropy.io.ascii
     '''
-    read_ascii(self, filename, Reader=asciitable.DaophotReader, **kwargs)
+    read_ascii(self, filename, Reader=ascii.Daophot, **kwargs)
 
 def read_latex(self, filename, **kwargs):
     '''
@@ -54,9 +45,9 @@ def read_latex(self, filename, **kwargs):
             *filename*: [ string ]
                 The file to read the table from
 
-        Keyword Arguments are passed to asciitable
+        Keyword Arguments are passed to astropy.io.ascii
     '''
-    read_ascii(self, filename, Reader=asciitable.LatexReader, **kwargs)
+    read_ascii(self, filename, Reader=ascii.Latex, **kwargs)
 
 
 def write_latex(self, filename, **kwargs):
@@ -68,9 +59,9 @@ def write_latex(self, filename, **kwargs):
             *filename*: [ string ]
                 The file to write the table to
 
-        Keyword Arguments are passed to asciitable
+        Keyword Arguments are passed to astropy.io.ascii
     '''
-    write_ascii(self, filename, Writer=asciitable.Latex, **kwargs)
+    write_ascii(self, filename, Writer=ascii.Latex, **kwargs)
 
 
 
@@ -83,9 +74,9 @@ def read_rdb(self, filename, **kwargs):
             *filename*: [ string ]
                 The file to read the table from
 
-        Keyword Arguments are passed to asciitable
+        Keyword Arguments are passed to astropy.io.ascii
     '''
-    read_ascii(self, filename, Reader=asciitable.RdbReader, **kwargs)
+    read_ascii(self, filename, Reader=ascii.Rdb, **kwargs)
 
 
 def write_rdb(self, filename, **kwargs):
@@ -97,17 +88,17 @@ def write_rdb(self, filename, **kwargs):
             *filename*: [ string ]
                 The file to write the table to
 
-        Keyword Arguments are passed to asciitable
+        Keyword Arguments are passed to astropy.io.ascii
     '''
-    write_ascii(self, filename, Writer=asciitable.Rdb, **kwargs)
+    write_ascii(self, filename, Writer=ascii.Rdb, **kwargs)
 
 
-# asciitable can handle file objects
+# astropy.io.ascii can handle file objects
 @auto_download_to_file
 @auto_decompress_to_fileobj
 def read_ascii(self, filename, **kwargs):
     '''
-    Read a table from an ASCII file using asciitable
+    Read a table from an ASCII file using astropy.io.ascii
 
     Optional Keyword Arguments:
 
@@ -126,27 +117,24 @@ def read_ascii(self, filename, **kwargs):
         include_names - list of names to include in output (default=None selects all names)
         exclude_names - list of names to exlude from output (applied after include_names)
 
-    Note that the Outputter and numpy arguments are not passed to asciitable.
+    Note that the Outputter argument is not passed to astropy.io.ascii.
 
-    See the asciitable documentation at http://cxc.harvard.edu/contrib/asciitable/ for more details.
+    See the astropy.io.ascii documentation at http://docs.astropy.org/en/latest/io/ascii/index.html for more details.
     '''
-
-    _check_asciitable_installed()
 
     self.reset()
 
-    kwargs['numpy'] = True
     if 'Outputter' in kwargs:
         kwargs.pop('Outputter')
-    table = asciitable.read(filename, **kwargs)
+    table = ascii.read(filename, **kwargs)
 
-    for name in table.dtype.names:
+    for name in table.colnames:
         self.add_column(name, table[name])
 
 
 def write_ascii(self, filename, **kwargs):
     '''
-    Read a table from an ASCII file using asciitable
+    Read a table from an ASCII file using astropy.io.ascii
 
     Optional Keyword Arguments:
 
@@ -159,10 +147,8 @@ def write_ascii(self, filename, **kwargs):
         include_names - list of names to include in output (default=None selects all names)
         exclude_names - list of names to exlude from output (applied after include_names)
 
-    See the asciitable documentation at http://cxc.harvard.edu/contrib/asciitable/ for more details.
+    See the astropy.io.ascii documentation at http://docs.astropy.org/en/latest/io/ascii/index.html for more details.
     '''
-
-    _check_asciitable_installed()
 
     if 'overwrite' in kwargs:
         overwrite = kwargs.pop('overwrite')
@@ -175,4 +161,4 @@ def write_ascii(self, filename, **kwargs):
         else:
             raise Exception("File exists: %s" % filename)
 
-    asciitable.write(self.data, filename, **kwargs)
+    ascii.write(self.data, filename, **kwargs)
