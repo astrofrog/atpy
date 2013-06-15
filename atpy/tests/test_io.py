@@ -407,6 +407,8 @@ class MySQLTestCase(unittest.TestCase, DefaultTestCase):
 
     format = 'mysql'
 
+    test_uint64 = None # unsupported
+
     def writeread(self, dtype):
 
         try:
@@ -422,6 +424,11 @@ class MySQLTestCase(unittest.TestCase, DefaultTestCase):
 class MySQLTestCaseQuery(unittest.TestCase, DefaultTestCase):
 
     format = 'mysql'
+
+    test_uint8 = None # unsupported
+    test_uint16 = None # unsupported
+    test_uint32 = None # unsupported
+    test_uint64 = None # unsupported
 
     def writeread(self, dtype):
 
