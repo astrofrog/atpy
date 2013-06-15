@@ -12,20 +12,6 @@ import tempfile
 import numpy as np
 np.seterr(all='ignore')
 
-try:
-    import MySQLdb
-except ImportError:
-    HAS_MYSQL = False
-else:
-    HAS_MySQL = True
-
-try:
-    import pgdb
-except ImportError:
-    HAS_POSTGRESQL = False
-else:
-    HAS_POSTGRESQL = True
-
 from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
 
@@ -430,7 +416,9 @@ class MySQLTestCase(unittest.TestCase, DefaultTestCase):
 
     def writeread(self, dtype):
 
-        if not HAS_MYSQL:
+        try:
+            import MySQLdb
+        except ImportError:
             pytest.skip()
 
         self.table_orig = generate_simple_table(dtype, shape)
@@ -444,7 +432,9 @@ class MySQLTestCaseQuery(unittest.TestCase, DefaultTestCase):
 
     def writeread(self, dtype):
 
-        if not HAS_MYSQL:
+        try:
+            import MySQLdb
+        except ImportError:
             pytest.skip()
 
         self.table_orig = generate_simple_table(dtype, shape)
@@ -460,7 +450,9 @@ class PostGreSQLTestCase(unittest.TestCase, DefaultTestCase):
 
     def writeread(self, dtype):
 
-        if not HAS_POSTGRESQL:
+        try:
+            import pgdb
+        except ImportError:
             pytest.skip()
 
         self.table_orig = generate_simple_table(dtype, shape)
@@ -476,7 +468,9 @@ class PostGreSQLTestCaseQuery(unittest.TestCase, DefaultTestCase):
 
     def writeread(self, dtype):
 
-        if not HAS_POSTGRESQL:
+        try:
+            import pgdb
+        except ImportError:
             pytest.skip()
 
         self.table_orig = generate_simple_table(dtype, shape)
