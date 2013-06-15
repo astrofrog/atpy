@@ -1,11 +1,8 @@
 from __future__ import division
 
 import unittest
-import warnings
-import os
 import string
 import random
-import getpass
 import sys
 import tempfile
 
@@ -289,21 +286,15 @@ class TestFITSVector(unittest.TestCase, DefaultTestCase):
         self.table_new = Table(filename, verbose=False)
 
 
-try:
-    import h5py
-except ImportError:
-    HAS_H5PY = False
-else:
-    HAS_H5PY = True
-
-
 class TestHDF5(unittest.TestCase, DefaultTestCase):
 
     format = 'hdf5'
 
     def writeread(self, dtype):
 
-        if not HAS_H5PY:
+        try:
+            import h5py
+        except ImportError:
             pytest.skip()
 
         filename = tempfile.mktemp(suffix='.hdf5')
@@ -321,7 +312,9 @@ class TestHDF5Vector(unittest.TestCase, DefaultTestCase):
 
     def writeread(self, dtype):
 
-        if not HAS_H5PY:
+        try:
+            import h5py
+        except ImportError:
             pytest.skip()
 
         filename = tempfile.mktemp(suffix='.hdf5')
@@ -423,7 +416,7 @@ class MySQLTestCase(unittest.TestCase, DefaultTestCase):
 
         self.table_orig = generate_simple_table(dtype, shape)
         self.table_orig.write('mysql', db='python', overwrite=True, verbose=False, user=USERNAME, passwd=PASSWORD)
-        self.table_new = atpy.Table('mysql', db='python', verbose=False, user=USERNAME, passwd=PASSWORD, table='atpy_test')
+        self.table_new = Table('mysql', db='python', verbose=False, user=USERNAME, passwd=PASSWORD, table='atpy_test')
 
 
 class MySQLTestCaseQuery(unittest.TestCase, DefaultTestCase):
@@ -439,7 +432,7 @@ class MySQLTestCaseQuery(unittest.TestCase, DefaultTestCase):
 
         self.table_orig = generate_simple_table(dtype, shape)
         self.table_orig.write('mysql', db='python', overwrite=True, verbose=False, user=USERNAME, passwd=PASSWORD)
-        self.table_new = atpy.Table('mysql', db='python', verbose=False, user=USERNAME, passwd=PASSWORD, query='select * from atpy_test')
+        self.table_new = Table('mysql', db='python', verbose=False, user=USERNAME, passwd=PASSWORD, query='select * from atpy_test')
 
 
 class PostGreSQLTestCase(unittest.TestCase, DefaultTestCase):
@@ -457,7 +450,7 @@ class PostGreSQLTestCase(unittest.TestCase, DefaultTestCase):
 
         self.table_orig = generate_simple_table(dtype, shape)
         self.table_orig.write('postgres', database='python', overwrite=True, verbose=False, user=USERNAME, password=PASSWORD)
-        self.table_new = atpy.Table('postgres', database='python', verbose=False, user=USERNAME, password=PASSWORD, table='atpy_test')
+        self.table_new = Table('postgres', database='python', verbose=False, user=USERNAME, password=PASSWORD, table='atpy_test')
 
 
 class PostGreSQLTestCaseQuery(unittest.TestCase, DefaultTestCase):
@@ -475,4 +468,4 @@ class PostGreSQLTestCaseQuery(unittest.TestCase, DefaultTestCase):
 
         self.table_orig = generate_simple_table(dtype, shape)
         self.table_orig.write('postgres', database='python', overwrite=True, verbose=False, user=USERNAME, password=PASSWORD)
-        self.table_new = atpy.Table('postgres', database='python', verbose=False, user=USERNAME, password=PASSWORD, query='select * from atpy_test')
+        self.table_new = Table('postgres', database='python', verbose=False, user=USERNAME, password=PASSWORD, query='select * from atpy_test')
