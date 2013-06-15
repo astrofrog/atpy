@@ -12,6 +12,20 @@ import tempfile
 import numpy as np
 np.seterr(all='ignore')
 
+try:
+    import MySQLdb
+except ImportError:
+    HAS_MYSQL = False
+else:
+    HAS_MySQL = True
+
+try:
+    import pgdb
+except ImportError:
+    HAS_POSTGRESQL = False
+else:
+    HAS_POSTGRESQL = True
+
 from astropy.tests.helper import pytest
 from astropy.utils.misc import NumpyRNGContext
 
@@ -400,3 +414,67 @@ class TestSQLiteQuery(unittest.TestCase, DefaultTestCase):
         self.table_orig.write('sqlite', filename, verbose=False, overwrite=True)
         self.table_new = Table('sqlite', filename, verbose=False, query='select * from atpy_test')
 
+
+# SQL connection parameters
+USERNAME = "testuser"
+PASSWORD = "testpassword"
+
+
+class MySQLTestCase(unittest.TestCase, DefaultTestCase):
+
+    format = 'mysql'
+
+    def writeread(self, dtype):
+
+        if not HAS_MYSQL:
+            pytest.skip()
+
+        self.table_orig = generate_simple_table(dtype, shape)
+        self.table_orig.write('mysql', db='python', overwrite=True, verbose=False, user=USERNAME, passwd=PASSWORD)
+        self.table_new = atpy.Table('mysql', db='python', verbose=False, user=USERNAME, passwd=PASSWORD, table='atpy_test')
+
+
+class MySQLTestCaseQuery(unittest.TestCase, DefaultTestCase):
+
+    format = 'mysql'
+
+    def writeread(self, dtype):
+
+        if not HAS_MYSQL:
+            pytest.skip()
+
+        self.table_orig = generate_simple_table(dtype, shape)
+        self.table_orig.write('mysql', db='python', overwrite=True, verbose=False, user=USERNAME, passwd=PASSWORD)
+        self.table_new = atpy.Table('mysql', db='python', verbose=False, user=USERNAME, passwd=PASSWORD, query='select * from atpy_test')
+
+
+class PostGreSQLTestCase(unittest.TestCase, DefaultTestCase):
+
+    format = 'postgres'
+
+    test_uint64 = None # unsupported
+
+    def writeread(self, dtype):
+
+        if not HAS_POSTGRESQL:
+            pytest.skip()
+
+        self.table_orig = generate_simple_table(dtype, shape)
+        self.table_orig.write('postgres', database='python', overwrite=True, verbose=False, user=USERNAME, password=PASSWORD)
+        self.table_new = atpy.Table('postgres', database='python', verbose=False, user=USERNAME, password=PASSWORD, table='atpy_test')
+
+
+class PostGreSQLTestCaseQuery(unittest.TestCase, DefaultTestCase):
+
+    format = 'postgres'
+
+    test_uint64 = None # unsupported
+
+    def writeread(self, dtype):
+
+        if not HAS_POSTGRESQL:
+            pytest.skip()
+
+        self.table_orig = generate_simple_table(dtype, shape)
+        self.table_orig.write('postgres', database='python', overwrite=True, verbose=False, user=USERNAME, password=PASSWORD)
+        self.table_new = atpy.Table('postgres', database='python', verbose=False, user=USERNAME, password=PASSWORD, query='select * from atpy_test')
