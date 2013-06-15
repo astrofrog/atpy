@@ -26,17 +26,10 @@ def random_int_array(dtype, shape):
     random.seed('integer')
     n = np.product(shape)
     n = n * np.iinfo(dtype).bits // 8
-    print(dtype, np.iinfo(dtype).bits, n)
     if sys.version_info[0] > 2:
         s = bytes([random.randrange(0, 256) for i in range(n)])
     else:
         s = "".join(chr(random.randrange(0, 256)) for i in range(n))
-    print(s)
-    print(repr(s))
-    print(len(s))
-    print(shape)
-    print(np.fromstring(s, dtype=dtype))
-    print(np.fromstring(s, dtype=dtype).shape)
     return np.fromstring(s, dtype=dtype).reshape(shape)
 
 
@@ -406,3 +399,4 @@ class TestSQLiteQuery(unittest.TestCase, DefaultTestCase):
         self.table_orig = generate_simple_table(dtype, shape)
         self.table_orig.write('sqlite', filename, verbose=False, overwrite=True)
         self.table_new = Table('sqlite', filename, verbose=False, query='select * from atpy_test')
+

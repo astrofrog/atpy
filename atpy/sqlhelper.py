@@ -4,6 +4,7 @@ from distutils import version
 import numpy as np
 import warnings
 import math
+import sys
 
 # SQLite
 
@@ -186,7 +187,10 @@ def list_tables(cursor, dbtype):
         for i, table_name in enumerate(table_names):
             if type(table_name) == tuple:
                 table_name = table_name[0]
-            tables[str(table_name.encode())] = str(table_name.encode())
+            if sys.version_info[0] > 2:
+                tables[table_name] = table_name
+            else:
+                tables[str(table_name.encode())] = str(table_name.encode())
     elif dbtype=='mysql':
         cursor.execute('SHOW TABLES;')
         for i, table_name in enumerate(cursor):

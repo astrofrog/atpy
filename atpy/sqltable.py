@@ -137,7 +137,7 @@ def read(self, dbtype, *args, **kwargs):
 
         # Find overall names and types for the table
         column_names, column_types, primary_keys = sql.column_info(cursor, dbtype, \
-            table_name)
+            str(table_name))
 
         self.table_name = table_name
 
