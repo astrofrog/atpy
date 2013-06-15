@@ -6,6 +6,10 @@ python:
     - 3.2
     - 3.3
 
+services:
+    - mysql
+    - postgresql
+
 env:
     # try all python versions with the latest stable numpy and astropy
     - ASTROPY_VERSION=stable NUMPY_VERSION=1.7.1 SETUP_CMD='test'
@@ -46,6 +50,14 @@ install:
 
    - if [[ $ASTROPY_VERSION == stable ]]; then pip -q install astropy --use-mirrors; fi
    - if [[ $ASTROPY_VERSION == development ]]; then pip -q install git+http://github.com/astropy/astropy.git#egg=astropy --use-mirrors; fi
+
+before_script:
+  - mysql -e "CREATE DATABASE atpy_test;"
+  - mysql -e "CREATE USER 'testuser'@'localhost' IDENTIFIED BY 'testpassword';"
+  - mysql -e "GRANT ALL ON *.* TO 'testuser'@'localhost';"
+  - psql -c "CREATE DATABASE atpy_test;" -U postgres
+  - psql -c "CREATE USER testuser WITH PASSWORD 'testpassword';" -U postgres
+  - psql -c "GRANT ALL PRIVILEGES ON DATABASE atpy_test TO testuser;" -U postgres
 
 script:
    - python setup.py $SETUP_CMD
