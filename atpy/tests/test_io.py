@@ -311,12 +311,14 @@ else:
     HAS_H5PY = True
 
 
-@pytest.mark.skipif('not HAS_H5PY')
 class TestHDF5(unittest.TestCase, DefaultTestCase):
 
     format = 'hdf5'
 
     def writeread(self, dtype):
+
+        if not HAS_H5PY:
+            pytest.skip()
 
         filename = tempfile.mktemp(suffix='.hdf5')
 
@@ -325,7 +327,6 @@ class TestHDF5(unittest.TestCase, DefaultTestCase):
         self.table_new = Table(filename, verbose=False)
 
 
-@pytest.mark.skipif('not HAS_H5PY')
 class TestHDF5Vector(unittest.TestCase, DefaultTestCase):
 
     format = 'hdf5'
@@ -333,6 +334,9 @@ class TestHDF5Vector(unittest.TestCase, DefaultTestCase):
     test_string = None  # unsupported
 
     def writeread(self, dtype):
+
+        if not HAS_H5PY:
+            pytest.skip()
 
         filename = tempfile.mktemp(suffix='.hdf5')
 
