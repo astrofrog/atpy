@@ -202,8 +202,12 @@ def _to_table(self, vo_table):
             if self._masked:
                 table.array.mask[name] = self.data[name].mask.astype(np.object_)
             else:
-                table.array.mask[name] = (self.data[name] == \
-                            self.columns[name].null).astype(np.object_)
+                if self.data[name].dtype.type == np.bytes_ and type(self.columns[name].null) != bytes:
+                    table.array.mask[name] = (self.data[name] == \
+                                self.columns[name].null.encode('utf-8')).astype(np.object_)
+                else:
+                    table.array.mask[name] = (self.data[name] == \
+                                self.columns[name].null).astype(np.object_)
         else:
             table.array[name] = self.data[name]
             if self._masked:

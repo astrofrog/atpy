@@ -83,6 +83,9 @@ def generate_simple_table(dtype, shape):
     except:
         name = dtype.type.__name__
 
+    if name == 'bytes_':
+        name = 'string_'
+
     values = random_generic(dtype, name, shape)
 
     table.add_column('col_' + name, values, dtype=dtype)
@@ -250,9 +253,13 @@ class DefaultTestCase():
         self.writeread(np.dtype('|S100'))
         before, after = self.table_orig.data['col_string_'], self.table_new.data['col_string_']
         self.assertEqual(before.shape, after.shape)
-        self.assertEqual(before.dtype.type, after.dtype.type)
         for i in range(len(self.table_orig)):
-            self.assertEqual(before[i], after[i])
+            if type(before[i]) == type(after[i]):
+                self.assertEqual(before[i], after[i])
+            elif type(before[i]) == np.bytes_:
+                self.assertEqual(before[i], after[i].encode('utf-8'))
+            else:
+                self.assertEqual(before[i].encode('utf-8'), after[i])
 
 
 class TestFITS(unittest.TestCase, DefaultTestCase):

@@ -1,6 +1,7 @@
 from __future__ import print_function, division
 
 import os
+import sys
 import numpy as np
 import warnings
 
@@ -379,6 +380,8 @@ def write(self, filename, overwrite=False):
         for name in self.names:
             if self.columns[name].dtype == np.uint64:
                 item = (("%" + self.columns[name].format) % long(self.data[name][i]))
+            elif sys.version_info[0] >= 3 and self.columns[name].dtype.type == np.bytes_:
+                item = (("%" + self.columns[name].format) % self.data[name][i].decode('utf-8'))
             else:
                 item = (("%" + self.columns[name].format) % self.data[name][i])
             item = ("%" + str(width[name]) + "s") % item
